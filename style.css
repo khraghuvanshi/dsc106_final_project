@@ -32,8 +32,6 @@ svg {
     border-radius: 10px;
     box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.15);
     margin-top: 10px;
-    width: 1000px; /* Increased width */
-    height: 500px; /* Increased height */
 }
 
 .line {
@@ -45,7 +43,7 @@ svg {
 }
 
 circle {
-    fill: #e74c3c;
+    fill: #006b95;
     stroke: white;
     stroke-width: 2px;
     cursor: pointer;
@@ -54,7 +52,7 @@ circle {
 
 circle:hover {
     transform: scale(1.5);
-    fill: #c0392b;
+    fill: #37abc8;
 }
 
 .tooltip {
