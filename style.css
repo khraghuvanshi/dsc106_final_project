@@ -32,6 +32,8 @@ svg {
     border-radius: 10px;
     box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.15);
     margin-top: 10px;
+    width: 1000px; /* Increased width */
+    height: 500px; /* Increased height */
 }
 
 .line {
