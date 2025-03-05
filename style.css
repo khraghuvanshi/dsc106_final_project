@@ -28,17 +28,6 @@ svg {
     stroke-width: 2px;
 }
 
-circle {
-    fill: red;
-    stroke: white;
-    stroke-width: 1px;
-    cursor: pointer;
-    transition: transform 0.2s ease-in-out;
-}
-
-circle:hover {
-    transform: scale(1.3);
-}
 
 .tooltip {
     position: absolute;
