@@ -27,7 +27,7 @@ h2 {
 }
 
 svg {
-    background: #ffffff;
+    background: #baf0ff;
     border: 1px solid #ddd;
     border-radius: 10px;
     box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.15);
@@ -44,7 +44,6 @@ svg {
 
 circle {
     fill: #006b95;
-    stroke: white;
     stroke-width: 2px;
     cursor: pointer;
     transition: transform 0.2s ease-in-out, fill 0.3s;
@@ -58,7 +57,6 @@ circle:hover {
 .tooltip {
     position: absolute;
     background: rgba(44, 62, 80, 0.85);
-    color: white;
     padding: 10px;
     border-radius: 5px;
     font-size: 14px;
