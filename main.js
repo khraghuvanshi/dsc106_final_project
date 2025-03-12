@@ -84,33 +84,37 @@ document.addEventListener("DOMContentLoaded", function () {
         .scaleLinear()
         .range([height - margin.bottom, margin.top]);
 
-      // Add axes groups
+      // Add axes groups with initial opacity 0
       const xAxis = svg
         .append("g")
         .attr("class", "x-axis")
+        .style("opacity", 0)
         .attr("transform", `translate(0,${height - margin.bottom})`);
 
       const yAxis = svg
         .append("g")
         .attr("class", "y-axis")
+        .style("opacity", 0)
         .attr("transform", `translate(${margin.left},0)`);
 
-      // Add axis labels
-      svg
+      // Add axis labels with initial opacity 0
+      const xLabel = svg
         .append("text")
         .attr("class", "x-label")
         .attr("text-anchor", "middle")
         .attr("x", width / 2)
         .attr("y", height - 10)
-        .text("Time");
+        .style("opacity", 0)
+        .text("Date");
 
-      svg
+      const yLabel = svg
         .append("text")
         .attr("class", "y-label")
         .attr("text-anchor", "middle")
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
         .attr("y", 20)
+        .style("opacity", 0)
         .text("Glucose Level (mg/dL)");
 
       // Set up line generator
@@ -161,6 +165,8 @@ document.addEventListener("DOMContentLoaded", function () {
         yScale,
         xAxis,
         yAxis,
+        xLabel,
+        yLabel,
         line,
         chartContent,
         lineGroup,
@@ -183,15 +189,12 @@ document.addEventListener("DOMContentLoaded", function () {
       };
 
       // Initial data update
-      updateData(currentParticipant);
-
-      // Update visualization for current step (will be 0 initially)
-      updateVisualization(0, true, false, -1);
+      updateData(currentParticipant, false); // No animation for initial load
 
       // Set up dropdown event listener
       dropdown.on("change", function () {
         chart.currentParticipant = this.value;
-        updateData(chart.currentParticipant);
+        updateData(chart.currentParticipant, true); // Add animation when changing participants
 
         // Re-apply current visualization state
         const activeStepIndex = Array.from(
@@ -221,8 +224,36 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function createDiabetesVisualization() {
+    const peopleGroup = chart.svg.append("g").attr("class", "people-group");
+    const columns = 5,
+      rows = 2,
+      personSize = 125,
+      rowSpacing = 200;
+    const offsetX = chart.width / 2 - (columns * personSize) / 2;
+    const offsetY = chart.height / 2 - (rows * personSize) / 2;
+
+    for (let i = 0; i < 10; i++) {
+      peopleGroup
+        .append("image")
+        .attr("x", offsetX + (i % columns) * personSize)
+        .attr(
+          "y",
+          offsetY + Math.floor(i / columns) * personSize + (i < 5 ? -10 : 10)
+        )
+        .attr("width", personSize)
+        .attr("height", personSize)
+        .attr("href", "person.svg")
+        .style("opacity", 0)
+        .transition()
+        .duration(500)
+        .delay(i * 100)
+        .style("opacity", i === 0 ? 1 : 0.5);
+    }
+  }
+
   // Function to update data for a specific participant
-  function updateData(participant) {
+  function updateData(participant, animate = false) {
     // Clear all existing elements first
     chart.pointGroup.selectAll(".dot").remove();
     chart.lineGroup.selectAll(".line-segment").remove();
@@ -251,14 +282,55 @@ document.addEventListener("DOMContentLoaded", function () {
       d3.max(chart.filteredData, (d) => d["Libre GL"]) + 10,
     ]);
 
-    // Update axes
-    chart.xAxis.call(d3.axisBottom(chart.xScale).ticks(5));
-    chart.yAxis.call(d3.axisLeft(chart.yScale));
+    // Update axes (but don't show them yet)
+    chart.xAxis
+      .transition()
+      .duration(750)
+      .call(d3.axisBottom(chart.xScale).ticks(5));
+    chart.yAxis.transition().duration(750).call(d3.axisLeft(chart.yScale));
 
     // Reset zoom state when changing participants
     chart.isZoomed = false;
     chart.lineSegments = [];
     chart.linesCreated = false; // Reset lines created flag
+
+    // Get current step to determine if we need to recreate elements
+    const activeStepIndex = Array.from(
+      document.querySelectorAll(".step")
+    ).findIndex((step) => step.classList.contains("is-active"));
+
+    // If we're on step 1 or beyond, recreate the points and show axes
+    if (activeStepIndex >= 1) {
+      // Show axes and labels
+      fadeInAxesAndLabels();
+      createPoints(animate);
+    } else {
+      // Hide axes and labels
+      fadeOutAxesAndLabels();
+    }
+
+    // If we're on step 2 or beyond, recreate the lines
+    if (activeStepIndex >= 2) {
+      // We'll recreate lines in updateVisualization
+      // Just marking that we need to recreate them
+      chart.linesCreated = false;
+    }
+  }
+
+  // Function to fade in axes and labels
+  function fadeInAxesAndLabels() {
+    chart.xAxis.transition().duration(500).style("opacity", 1);
+    chart.yAxis.transition().duration(500).style("opacity", 1);
+    chart.xLabel.transition().duration(500).style("opacity", 1);
+    chart.yLabel.transition().duration(500).style("opacity", 1);
+  }
+
+  // Function to fade out axes and labels
+  function fadeOutAxesAndLabels() {
+    chart.xAxis.transition().duration(500).style("opacity", 0);
+    chart.yAxis.transition().duration(500).style("opacity", 0);
+    chart.xLabel.transition().duration(500).style("opacity", 0);
+    chart.yLabel.transition().duration(500).style("opacity", 0);
   }
 
   // Function to update visualization based on scroll step and direction
@@ -270,23 +342,14 @@ document.addEventListener("DOMContentLoaded", function () {
   ) {
     if (!chart) return;
 
-    // Always show axes from step 0 onwards
-    if (stepIndex >= 0) {
-      d3.selectAll(".x-axis, .y-axis").classed("show-element", true);
-    } else {
-      d3.selectAll(".x-axis, .y-axis").classed("show-element", false);
-    }
-
-    // Step 0: Show only the axes
+    // Step 0 (first real step): Understanding the Data - blank chart
     if (stepIndex === 0) {
-      // Just show the axes
+      // If scrolling up from step 1+, remove points/lines and hide axes
       if (isScrollingUp && lastStepIndex > 0) {
-        // If scrolling up from step 1+, animate points/lines out
         chart.pointGroup
           .selectAll(".dot")
           .transition()
           .duration(500)
-          .attr("cy", -10)
           .style("opacity", 0)
           .remove();
 
@@ -298,22 +361,61 @@ document.addEventListener("DOMContentLoaded", function () {
           .remove();
 
         chart.linesCreated = false;
+
+        // Fade out axes and labels when scrolling back to step 0
+        fadeOutAxesAndLabels();
+        chart.svg
+          .selectAll(".people-group")
+          .transition()
+          .duration(500)
+          .style("opacity", 0)
+          .remove();
       }
     }
 
-    // Step 1: Show only the axes with more context
-    else if (stepIndex === 1) {
-      // Just show the axes with updated labels
-      if (isScrollingUp && lastStepIndex > 1) {
-        // If scrolling up from step 2+, animate points/lines out
+    if (stepIndex === 1) {
+      // Create 10-person visualization when entering "Why Should You Care?"
+      if (isScrollingDown) {
+        createDiabetesVisualization();
+      }
+      // Remove when scrolling away
+      else if (isScrollingUp) {
+        // Do opposite if scrolling up
+        fadeOutAxesAndLabels();
+        createDiabetesVisualization();
         chart.pointGroup
           .selectAll(".dot")
           .transition()
           .duration(500)
-          .attr("cy", -10)
+          .style("opacity", 0)
+          .remove();
+      }
+    } else if (stepIndex === 2) {
+      if (isScrollingDown) {
+        // Fade out people
+        chart.svg
+          .selectAll(".people-group")
+          .transition()
+          .duration(500)
           .style("opacity", 0)
           .remove();
 
+        // Add labels and axes
+        fadeInAxesAndLabels();
+      } else if (isScrollingUp) {
+        chart.pointGroup
+          .selectAll(".dot")
+          .transition()
+          .duration(500)
+          .style("opacity", 0)
+          .remove();
+      }
+    }
+
+    // Step 1: Show meal points and fade in axes/labels
+    else if (stepIndex === 3) {
+      if (isScrollingDown) {
+        // Remove existing line segments when scrolling down to step 1
         chart.lineGroup
           .selectAll(".line-segment")
           .transition()
@@ -322,51 +424,36 @@ document.addEventListener("DOMContentLoaded", function () {
           .remove();
 
         chart.linesCreated = false;
-      }
-    }
 
-    // Step 2: Show meal points
-    else if (stepIndex === 2) {
-      if (isScrollingDown || (isScrollingUp && lastStepIndex > 2)) {
-        // Handle points based on direction
-        if (isScrollingDown) {
-          // Remove existing line segments when scrolling down to step 2
-          chart.lineGroup
-            .selectAll(".line-segment")
-            .transition()
-            .duration(500)
-            .style("opacity", 0)
-            .remove();
+        // Create dots with fade-in
+        createPoints(true);
+      } else if (isScrollingUp && lastStepIndex > 2) {
+        // If scrolling up from step 2, just remove line segments
+        chart.lineGroup
+          .selectAll(".line-segment")
+          .transition()
+          .duration(500)
+          .style("opacity", 0)
+          .remove();
 
-          chart.linesCreated = false;
+        chart.linesCreated = false;
 
-          // Create dots
+        // Make sure points are visible
+        if (!chart.pointGroup.selectAll(".dot").size()) {
           createPoints(true);
-        } else if (isScrollingUp) {
-          // If scrolling up from step 3, just remove line segments
-          chart.lineGroup
-            .selectAll(".line-segment")
-            .transition()
-            .duration(500)
-            .style("opacity", 0)
-            .remove();
-
-          chart.linesCreated = false;
-
-          // Make sure points are visible
-          if (!chart.pointGroup.selectAll(".dot").size()) {
-            createPoints(true);
-          }
         }
       }
     }
 
-    // Step 3 and 4: Show line segments connecting meal points
-    else if (stepIndex >= 3) {
+    // Step 2 and 3: Show line segments connecting meal points
+    else if (stepIndex >= 2) {
       // First ensure all points are visible
       if (!chart.pointGroup.selectAll(".dot").size()) {
         createPoints(false);
       }
+
+      // Ensure axes and labels are visible
+      fadeInAxesAndLabels();
 
       // Handle line segments based on direction
       if (!chart.linesCreated) {
@@ -413,8 +500,8 @@ document.addEventListener("DOMContentLoaded", function () {
           // Animate the path dropping in - SLOWER ANIMATION
           path
             .transition()
-            .delay(i * 50) // Increase delay
-            .duration(1000) // Set to 1000ms (1 second)
+            .delay(i * 50) // Staggered delay
+            .duration(1000) // 1 second duration
             .attr("d", pathGenerator)
             .style("opacity", 1);
 
@@ -477,8 +564,26 @@ document.addEventListener("DOMContentLoaded", function () {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    // Calculate initial tooltip position
-    let xPos = event.clientX + 20;
+    // Calculate position based on where the point is on the x-axis
+    // Get the chart's width and calculate the halfway point
+    const chartWidth = chart.width;
+    const halfwayPoint =
+      chart.xScale(chart.xScale.domain()[0]) +
+      (chartWidth - chart.margin.left - chart.margin.right) / 2;
+
+    // Check if the point is past the halfway point
+    const isPastHalfway = chart.xScale(d.Timestamp) > halfwayPoint;
+
+    // Position the tooltip to the left or right based on the point's position
+    let xPos;
+    if (isPastHalfway) {
+      // If past halfway, position tooltip to the left of the point
+      xPos = event.clientX - 190; // Adjust this value based on tooltip width
+    } else {
+      // If before halfway, position tooltip to the right of the point
+      xPos = event.clientX + 20;
+    }
+
     let yPos = event.clientY - 10;
 
     // Create the tooltip content
@@ -490,14 +595,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const adjustedFiber = ((+d.Fiber || 0) * amountConsumed).toFixed(2);
 
     const content = `
-          <strong>${d["Meal Type"] || "Unknown Meal"}</strong><br>
-          Calories: ${adjustedCalories}<br>
-          Carbs: ${adjustedCarbs}g<br>
-          Protein: ${adjustedProtein}g<br>
-          Fat: ${adjustedFat}g<br>
-          Fiber: ${adjustedFiber}g<br>
-          Glucose: ${d["Libre GL"].toFixed(1)} mg/dL
-        `;
+                <strong>${d["Meal Type"] || "Unknown Meal"}</strong><br>
+                Calories: ${adjustedCalories}<br>
+                Carbs: ${adjustedCarbs}g<br>
+                Protein: ${adjustedProtein}g<br>
+                Fat: ${adjustedFat}g<br>
+                Fiber: ${adjustedFiber}g<br>
+                Glucose: ${d["Libre GL"].toFixed(1)} mg/dL
+              `;
 
     // First set content and make visible but off-screen for measurement
     chart.tooltip
@@ -510,6 +615,22 @@ document.addEventListener("DOMContentLoaded", function () {
     const tooltipElement = chart.tooltip.node();
     const tooltipWidth = tooltipElement.offsetWidth;
     const tooltipHeight = tooltipElement.offsetHeight;
+
+    // Ensure tooltip doesn't go outside viewport
+    if (xPos + tooltipWidth > viewportWidth) {
+      xPos = viewportWidth - tooltipWidth - 10;
+    } else if (xPos < 0) {
+      xPos = 10;
+    }
+
+    if (yPos + tooltipHeight > viewportHeight) {
+      yPos = viewportHeight - tooltipHeight - 10;
+    } else if (yPos < 0) {
+      yPos = 10;
+    }
+
+    // Update final position
+    chart.tooltip.style("left", `${xPos}px`).style("top", `${yPos}px`);
 
     // Highlight the point
     d3.select(this).transition().duration(200).attr("r", 8);
