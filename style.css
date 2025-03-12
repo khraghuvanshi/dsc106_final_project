@@ -2,7 +2,8 @@ body {
   font-family: "Poppins", sans-serif;
   text-align: center;
   background-color: #eef2f3;
-  margin: 20px;
+  margin: 0;
+  padding: 0;
 }
 
 h2 {
@@ -79,4 +80,49 @@ circle:hover {
   pointer-events: none;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
   transition: opacity 0.3s ease-in-out;
+}
+
+#title-container,
+#text-container,
+#chart-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+#title-container {
+  background-color: #f0f0f0;
+  z-index: 3; /* Ensure it's on top */
+}
+
+#text-container {
+  background-color: #e0e0e0;
+  opacity: 0; /* Initially hidden */
+  z-index: 2;
+}
+
+#chart-container {
+  background-color: #d0d0d0;
+  opacity: 0; /* Initially hidden */
+  z-index: 1;
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Center children horizontally */
+  justify-content: center; /* Center children vertically */
+}
+
+/* Enable pointer events for the chart */
+#chart-container svg {
+  pointer-events: all;
+}
+
+select {
+  margin-top: 20px;
+  pointer-events: all;
 }
