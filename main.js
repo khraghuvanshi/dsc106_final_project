@@ -342,7 +342,7 @@ document.addEventListener("DOMContentLoaded", function () {
   ) {
     if (!chart) return;
 
-    // Step 0 (first real step): Understanding the Data - blank chart
+    // Blank chart
     if (stepIndex === 0) {
       // If scrolling up from step 1+, remove points/lines and hide axes
       if (isScrollingUp && lastStepIndex > 0) {
@@ -380,7 +380,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       // Remove when scrolling away
       else if (isScrollingUp) {
-        // Do opposite if scrolling up
         fadeOutAxesAndLabels();
         createDiabetesVisualization();
         chart.pointGroup
@@ -390,7 +389,10 @@ document.addEventListener("DOMContentLoaded", function () {
           .style("opacity", 0)
           .remove();
       }
-    } else if (stepIndex === 2) {
+    }
+
+    // Creates temporary table of data
+    else if (stepIndex === 2) {
       if (isScrollingDown) {
         // Fade out people
         chart.svg
@@ -412,7 +414,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    // Step 1: Show meal points and fade in axes/labels
+    // Show meal points and fade in axes/labels
     else if (stepIndex === 3) {
       if (isScrollingDown) {
         // Remove existing line segments when scrolling down to step 1
@@ -445,7 +447,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    // Step 2 and 3: Show line segments connecting meal points
+    // Show line segments connecting meal points
     else if (stepIndex >= 2) {
       // First ensure all points are visible
       if (!chart.pointGroup.selectAll(".dot").size()) {
