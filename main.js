@@ -188,35 +188,56 @@ document.addEventListener("DOMContentLoaded", function () {
         linesCreated,
       };
 
-      const tableGroup = chart.svg.append("g").attr("class", "table-group").style("opacity", 0);
-    const sampleData = chart.data.slice(220, 240);
-    const headers = ["Libre GL", "Meal Type", "Calories", "Carbs", "Protein", "Fat", "Fiber"];
-    const startX = chart.width / 4 - 150;
-    const startY = chart.height / 4 - 50;
-    const rowHeight = 20;
+      const tableGroup = chart.svg
+        .append("g")
+        .attr("class", "table-group")
+        .style("opacity", 0)
+        .style("pointer-events", "none");
+      const sampleData = chart.data.slice(220, 240);
+      const headers = [
+        "Libre GL",
+        "Meal Type",
+        "Calories",
+        "Carbs",
+        "Protein",
+        "Fat",
+        "Fiber",
+      ];
+      const startX = chart.width / 4 - 150;
+      const startY = chart.height / 4 - 50;
+      const rowHeight = 20;
 
-    tableGroup.append("text")
-      .attr("x", startX)
-      .attr("y", startY - 30)
-      .attr("font-weight", "bold")
-      .text("Sample Data");
-
-    headers.forEach((header, i) => {
-      tableGroup.append("text")
-        .attr("x", startX + i * 100)
-        .attr("y", startY)
+      tableGroup
+        .append("text")
+        .attr("x", startX)
+        .attr("y", startY - 30)
         .attr("font-weight", "bold")
-        .text(header);
-    });
+        .text("Sample Data");
 
-    sampleData.forEach((row, rIdx) => {
-      headers.forEach((header, cIdx) => {
-        tableGroup.append("text")
-          .attr("x", startX + cIdx * 100)
-          .attr("y", startY + (rIdx + 1) * rowHeight)
-          .text(row[header] !== "" ? typeof row[header] !== "number"  ? row[header] : row[header].toFixed(2) : "NaN");
+      headers.forEach((header, i) => {
+        tableGroup
+          .append("text")
+          .attr("x", startX + i * 100)
+          .attr("y", startY)
+          .attr("font-weight", "bold")
+          .text(header);
       });
-    });
+
+      sampleData.forEach((row, rIdx) => {
+        headers.forEach((header, cIdx) => {
+          tableGroup
+            .append("text")
+            .attr("x", startX + cIdx * 100)
+            .attr("y", startY + (rIdx + 1) * rowHeight)
+            .text(
+              row[header] !== ""
+                ? typeof row[header] !== "number"
+                  ? row[header]
+                  : row[header].toFixed(2)
+                : "NaN"
+            );
+        });
+      });
 
       // Initial data update
       updateData(currentParticipant, false); // No animation for initial load
@@ -278,7 +299,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .transition()
         .duration(500)
         .delay(i * 100)
-        .style("opacity", i === 0 ? 1 : 0.5);
+        .style("opacity", i === 0 ? 1 : 0.35);
     }
   }
 
@@ -419,9 +440,12 @@ document.addEventListener("DOMContentLoaded", function () {
           .style("opacity", 0)
           .remove();
 
-          chart.svg.select(".table-group").transition().duration(500).style("opacity", 0);
+        chart.svg
+          .select(".table-group")
+          .transition()
+          .duration(500)
+          .style("opacity", 0);
       }
-
     }
 
     // Creates temporary table of data
@@ -435,7 +459,11 @@ document.addEventListener("DOMContentLoaded", function () {
           .style("opacity", 0)
           .remove();
 
-        chart.svg.select(".table-group").transition().duration(500).style("opacity", 1);
+        chart.svg
+          .select(".table-group")
+          .transition()
+          .duration(500)
+          .style("opacity", 1);
         chart.xAxis.transition().duration(500).style("opacity", 0);
         chart.yAxis.transition().duration(500).style("opacity", 0);
       } else if (isScrollingUp) {
@@ -450,9 +478,13 @@ document.addEventListener("DOMContentLoaded", function () {
         fadeOutAxesAndLabels();
 
         // Add table back
-          chart.svg.select(".table-group").transition().duration(500).style("opacity", 1);
-          chart.xAxis.transition().duration(500).style("opacity", 0);
-          chart.yAxis.transition().duration(500).style("opacity", 0);
+        chart.svg
+          .select(".table-group")
+          .transition()
+          .duration(500)
+          .style("opacity", 1);
+        chart.xAxis.transition().duration(500).style("opacity", 0);
+        chart.yAxis.transition().duration(500).style("opacity", 0);
       }
     }
 
@@ -460,7 +492,11 @@ document.addEventListener("DOMContentLoaded", function () {
     else if (stepIndex === 3) {
       if (isScrollingDown) {
         // Remove table
-        chart.svg.select(".table-group").transition().duration(500).style("opacity", 0);
+        chart.svg
+          .select(".table-group")
+          .transition()
+          .duration(500)
+          .style("opacity", 0);
 
         // Add axes and labels
         fadeInAxesAndLabels();
