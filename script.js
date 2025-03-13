@@ -1,4 +1,4 @@
-const svg = d3.select("glucoseChart");
+const svg = d3.select("#glucoseChart");
 const width = +svg.attr("width");
 const height = +svg.attr("height");
 
