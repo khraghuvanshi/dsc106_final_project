@@ -188,6 +188,36 @@ document.addEventListener("DOMContentLoaded", function () {
         linesCreated,
       };
 
+      const tableGroup = chart.svg.append("g").attr("class", "table-group").style("opacity", 0);
+    const sampleData = chart.data.slice(220, 240);
+    const headers = ["Libre GL", "Meal Type", "Calories", "Carbs", "Protein", "Fat", "Fiber"];
+    const startX = chart.width / 4 - 150;
+    const startY = chart.height / 4 - 50;
+    const rowHeight = 20;
+
+    tableGroup.append("text")
+      .attr("x", startX)
+      .attr("y", startY - 30)
+      .attr("font-weight", "bold")
+      .text("Sample Data");
+
+    headers.forEach((header, i) => {
+      tableGroup.append("text")
+        .attr("x", startX + i * 100)
+        .attr("y", startY)
+        .attr("font-weight", "bold")
+        .text(header);
+    });
+
+    sampleData.forEach((row, rIdx) => {
+      headers.forEach((header, cIdx) => {
+        tableGroup.append("text")
+          .attr("x", startX + cIdx * 100)
+          .attr("y", startY + (rIdx + 1) * rowHeight)
+          .text(row[header] !== "" ? typeof row[header] !== "number"  ? row[header] : row[header].toFixed(2) : "NaN");
+      });
+    });
+
       // Initial data update
       updateData(currentParticipant, false); // No animation for initial load
 
@@ -388,7 +418,10 @@ document.addEventListener("DOMContentLoaded", function () {
           .duration(500)
           .style("opacity", 0)
           .remove();
+
+          chart.svg.select(".table-group").transition().duration(500).style("opacity", 0);
       }
+
     }
 
     // Creates temporary table of data
@@ -402,8 +435,9 @@ document.addEventListener("DOMContentLoaded", function () {
           .style("opacity", 0)
           .remove();
 
-        // Add labels and axes
-        fadeInAxesAndLabels();
+        chart.svg.select(".table-group").transition().duration(500).style("opacity", 1);
+        chart.xAxis.transition().duration(500).style("opacity", 0);
+        chart.yAxis.transition().duration(500).style("opacity", 0);
       } else if (isScrollingUp) {
         chart.pointGroup
           .selectAll(".dot")
@@ -411,12 +445,26 @@ document.addEventListener("DOMContentLoaded", function () {
           .duration(500)
           .style("opacity", 0)
           .remove();
+
+        // Fade axes and labels out
+        fadeOutAxesAndLabels();
+
+        // Add table back
+          chart.svg.select(".table-group").transition().duration(500).style("opacity", 1);
+          chart.xAxis.transition().duration(500).style("opacity", 0);
+          chart.yAxis.transition().duration(500).style("opacity", 0);
       }
     }
 
     // Show meal points and fade in axes/labels
     else if (stepIndex === 3) {
       if (isScrollingDown) {
+        // Remove table
+        chart.svg.select(".table-group").transition().duration(500).style("opacity", 0);
+
+        // Add axes and labels
+        fadeInAxesAndLabels();
+
         // Remove existing line segments when scrolling down to step 1
         chart.lineGroup
           .selectAll(".line-segment")
