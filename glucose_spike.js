@@ -156,15 +156,25 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Function to update slider values in UI
+    function updateDisplayedValues() {
+        document.getElementById("preMealGlucoseValue").innerText = document.getElementById("preMealGlucose").value;
+        document.getElementById("bmiValue").innerText = document.getElementById("bmi").value;
+        document.getElementById("carbsValue").innerText = document.getElementById("carbs").value;
+        document.getElementById("proteinValue").innerText = document.getElementById("protein").value;
+        document.getElementById("fatValue").innerText = document.getElementById("fat").value;
+    }
+
     // Function to update values from sliders
     function updateValues() {
-        let preMealGlucose = parseFloat(document.getElementById("preMealGlucose").value);
-        let bmi = parseFloat(document.getElementById("bmi").value);
-        let carbs = parseFloat(document.getElementById("carbs").value);
-        let protein = parseFloat(document.getElementById("protein").value);
-        let fat = parseFloat(document.getElementById("fat").value);
-
-        updatePrediction(preMealGlucose, bmi, carbs, protein, fat);
+        updateDisplayedValues(); // Ensure UI updates
+        updatePrediction(
+            parseFloat(document.getElementById("preMealGlucose").value),
+            parseFloat(document.getElementById("bmi").value),
+            parseFloat(document.getElementById("carbs").value),
+            parseFloat(document.getElementById("protein").value),
+            parseFloat(document.getElementById("fat").value)
+        );
     }
 
     // Event Listeners for Sliders
