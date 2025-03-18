@@ -1,48 +1,108 @@
 document.addEventListener("DOMContentLoaded", function () {
-    let ctx = document.getElementById("glucoseChart").getContext("2d");
+    // Set chart dimensions
+    const width = 600, height = 400, margin = { top: 50, right: 150, bottom: 50, left: 70 };
 
-    // Initialize Chart.js
-    let glucoseChart = new Chart(ctx, {
-        type: "line",
-        data: {
-            labels: ["Pre-Meal", "1-Hour", "2-Hour"],
-            datasets: [
-                { label: "Healthy", borderColor: "green", data: [0, 0, 0], fill: false },
-                { label: "Prediabetic", borderColor: "orange", data: [0, 0, 0], fill: false },
-                { label: "Diabetic", borderColor: "red", data: [0, 0, 0], fill: false }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    min: 70, // Set lower bound (default fasting glucose)
-                    max: 1000, // Set upper bound
-                    title: { display: true, text: "Glucose Level (mg/dL)" }
-                },
-                x: { title: { display: true, text: "Time" } }
-            }
-        }
+    // Create SVG canvas
+    const svg = d3.select("#glucoseChartContainer")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Fixed Y-axis scale
+    const yScale = d3.scaleLinear()
+        .domain([70, 900])  // Fixed glucose range
+        .range([height, 0]);
+
+    // X-axis scale
+    const xScale = d3.scalePoint()
+        .domain(["Pre-Meal", "1-Hour", "2-Hour"])
+        .range([0, width]);
+
+    // Add X and Y axes with formatted labels
+    svg.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(xScale));
+
+    svg.append("g")
+        .call(d3.axisLeft(yScale).tickFormat(d => `${d} mg/dL`));
+
+    // Add Grid Lines
+    const grid = svg.append("g").attr("class", "grid");
+
+    // Horizontal Grid Lines (Y-axis)
+    grid.selectAll(".yGrid")
+        .data(yScale.ticks())
+        .enter()
+        .append("line")
+        .attr("x1", 0)
+        .attr("x2", width)
+        .attr("y1", d => yScale(d))
+        .attr("y2", d => yScale(d))
+        .attr("stroke", "#ddd")
+        .attr("stroke-width", 1)
+        .attr("stroke-dasharray", "4,4");
+
+    // Line generator
+    const line = d3.line()
+        .x((d, i) => xScale(["Pre-Meal", "1-Hour", "2-Hour"][i]))
+        .y(d => yScale(d));
+
+    // Colors for different risk groups
+    const colors = { "Healthy": "green", "Prediabetic": "orange", "Diabetic": "red" };
+
+    // Store line references
+    let lines = {};
+    let activeLines = { "Healthy": true, "Prediabetic": true, "Diabetic": true };
+
+    // Initialize lines for each group
+    ["Healthy", "Prediabetic", "Diabetic"].forEach(group => {
+        lines[group] = svg.append("path")
+            .datum([90, 90, 90]) // Default glucose values
+            .attr("fill", "none")
+            .attr("stroke", colors[group])
+            .attr("stroke-width", 3)
+            .attr("opacity", 1) // Fully visible initially
+            .attr("d", line);
     });
 
-    // Function to update values from sliders
-    function updateValues() {
-        let preMealGlucose = parseFloat(document.getElementById("preMealGlucose").value);
-        let bmi = parseFloat(document.getElementById("bmi").value);
-        let carbs = parseFloat(document.getElementById("carbs").value);
-        let protein = parseFloat(document.getElementById("protein").value);
-        let fat = parseFloat(document.getElementById("fat").value);
+    // **Create Interactive Legend with Animation**
+    const legend = svg.append("g")
+        .attr("transform", `translate(${width + 20}, 50)`);
 
-        // Update displayed values
-        document.getElementById("preMealGlucoseValue").innerText = preMealGlucose;
-        document.getElementById("bmiValue").innerText = bmi;
-        document.getElementById("carbsValue").innerText = carbs;
-        document.getElementById("proteinValue").innerText = protein;
-        document.getElementById("fatValue").innerText = fat;
+    Object.keys(colors).forEach((group, i) => {
+        let legendItem = legend.append("g")
+            .attr("transform", `translate(0, ${i * 25})`)
+            .style("cursor", "pointer")
+            .on("click", function () {
+                // Toggle visibility with fade animation
+                activeLines[group] = !activeLines[group];
+                lines[group]
+                    .transition()
+                    .duration(500)
+                    .style("opacity", activeLines[group] ? 1 : 0); // Fade in/out
 
-        updatePrediction(preMealGlucose, bmi, carbs, protein, fat);
-    }
+                // Update legend opacity
+                d3.select(this).select("text")
+                    .transition()
+                    .duration(500)
+                    .style("opacity", activeLines[group] ? 1 : 0.3);
+            });
+
+        // Legend color box
+        legendItem.append("rect")
+            .attr("width", 15)
+            .attr("height", 15)
+            .attr("fill", colors[group]);
+
+        // Legend text
+        legendItem.append("text")
+            .attr("x", 20)
+            .attr("y", 12)
+            .text(group)
+            .style("font-size", "14px");
+    });
 
     // Function to calculate glucose spike
     function calculateGlucoseSpike(riskLevel, preMealGlucose, bmi, carbs, protein, fat) {
@@ -60,7 +120,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let group = riskLevel === 0 ? "Healthy" : riskLevel === 1 ? "Prediabetic" : "Diabetic";
 
-        // Compute **1-hour glucose spike**
         let glucose1H = preMealGlucose +
                         (bmi * coeffs_1H[group].BMI) +
                         (carbs * coeffs_1H[group].Carbs) +
@@ -68,35 +127,49 @@ document.addEventListener("DOMContentLoaded", function () {
                         (fat * coeffs_1H[group].Fat) +
                         (preMealGlucose * coeffs_1H[group].PreMealGlucose);
 
-        // Compute **2-hour glucose** based on **1-hour glucose**
         let glucose2H = glucose1H +
                         (bmi * coeffs_2H[group].BMI) +
                         (carbs * coeffs_2H[group].Carbs) +
                         (protein * coeffs_2H[group].Protein) +
                         (fat * coeffs_2H[group].Fat) +
-                        (glucose1H * coeffs_2H[group].PreviousGlucose); 
+                        (glucose1H * coeffs_2H[group].PreviousGlucose);
 
         return { glucose1H, glucose2H };
     }
 
-    // Function to update prediction and chart
+    // Function to update predictions and redraw the lines
     function updatePrediction(preMealGlucose, bmi, carbs, protein, fat) {
-        let healthy = calculateGlucoseSpike(0, preMealGlucose, bmi, carbs, protein, fat);
-        let prediabetic = calculateGlucoseSpike(1, preMealGlucose, bmi, carbs, protein, fat);
-        let diabetic = calculateGlucoseSpike(2, preMealGlucose, bmi, carbs, protein, fat);
+        let data = {
+            "Healthy": calculateGlucoseSpike(0, preMealGlucose, bmi, carbs, protein, fat),
+            "Prediabetic": calculateGlucoseSpike(1, preMealGlucose, bmi, carbs, protein, fat),
+            "Diabetic": calculateGlucoseSpike(2, preMealGlucose, bmi, carbs, protein, fat)
+        };
 
-        // **Reset chart data before updating**
-        glucoseChart.data.datasets.forEach(dataset => dataset.data = []);
+        // Update each line based on new calculations
+        ["Healthy", "Prediabetic", "Diabetic"].forEach(group => {
+            let glucoseValues = [preMealGlucose, data[group].glucose1H, data[group].glucose2H];
 
-        // **Add new calculated values**
-        glucoseChart.data.datasets[0].data = [preMealGlucose, healthy.glucose1H, healthy.glucose2H];
-        glucoseChart.data.datasets[1].data = [preMealGlucose, prediabetic.glucose1H, prediabetic.glucose2H];
-        glucoseChart.data.datasets[2].data = [preMealGlucose, diabetic.glucose1H, diabetic.glucose2H];
+            lines[group]
+                .datum(glucoseValues)
+                .transition().duration(500)
+                .attr("d", line);
+        });
+    }
 
-        glucoseChart.update();
+    // Function to update values from sliders
+    function updateValues() {
+        let preMealGlucose = parseFloat(document.getElementById("preMealGlucose").value);
+        let bmi = parseFloat(document.getElementById("bmi").value);
+        let carbs = parseFloat(document.getElementById("carbs").value);
+        let protein = parseFloat(document.getElementById("protein").value);
+        let fat = parseFloat(document.getElementById("fat").value);
+
+        updatePrediction(preMealGlucose, bmi, carbs, protein, fat);
     }
 
     // Event Listeners for Sliders
     document.querySelectorAll("input").forEach(input => input.addEventListener("input", updateValues));
+
+    // Initialize with default values
     updateValues();
 });
