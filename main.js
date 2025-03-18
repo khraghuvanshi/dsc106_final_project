@@ -1,4 +1,5 @@
-import { createCluster} from "./script.js";
+import { createCluster } from "./script.js";
+import { createGlucoseSpike } from "./glucose_spike.js";
 document.addEventListener("DOMContentLoaded", function () {
 
   const toggleButton = document.getElementById("toggleNightMode");
@@ -56,9 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Chart initialization and update functions
   function initializeChart() {
     // Load data
-    d3.csv(
-      "https://raw.githubusercontent.com/khraghuvanshi/dsc106_final_project/refs/heads/main/CGmacros_merge.csv"
-    ).then(function (data) {
+    d3.csv("./CGmacros_merge.csv").then(function (data) {
       // Convert data types
       data.forEach((d) => {
         d.Timestamp = new Date(d.Timestamp);
@@ -570,7 +569,8 @@ document.addEventListener("DOMContentLoaded", function () {
         createLines(true);
       }
     }
-    if (stepIndex == 5) {
+
+    else if (stepIndex == 5) {
       if (isScrollingDown) {
         chart.pointGroup
           .selectAll(".dot")
@@ -590,6 +590,13 @@ document.addEventListener("DOMContentLoaded", function () {
         createCluster();
       } else if (isScrollingUp) {
         console.log("hello");
+      }
+    }
+
+    else if (stepIndex == 6) {
+      if (isScrollingDown) {
+        removeCluster();
+        createGlucoseSpike();
       }
     }
   }
