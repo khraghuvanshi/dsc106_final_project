@@ -176,27 +176,3 @@ export function createCluster() {
     };
   });
 }
-
-export function clearCluster() {
-  console.log('clearing')
-    // Select the SVG element
-  const svg = d3.select("#glucoseChart");
-
-  // Remove all circles (data points)
-  svg.selectAll("circle").remove();
-
-  // Remove any text elements (like category labels)
-  svg.selectAll("text").remove();
-
-  // Remove any tooltip elements that might have been created
-  d3.select("body").selectAll("div.tooltip").remove();
-
-//   // Reset form inputs if they exist
-//   const inputFields = ["carbs", "protein", "fat", "fiber"];
-//   inputFields.forEach((field) => {
-//     const element = document.getElementById(field);
-//     if (element) {
-//       element.value = "";
-//     }
-//   });
-}
