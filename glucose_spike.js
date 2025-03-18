@@ -162,9 +162,10 @@ export function createGlucoseSpike() {
     function updateDisplayedValues() {
         document.getElementById("preMealGlucoseValue").innerText = document.getElementById("preMealGlucose").value;
         document.getElementById("bmiValue").innerText = document.getElementById("bmi").value;
-        document.getElementById("carbsValue").innerText = document.getElementById("carbs").value;
-        document.getElementById("proteinValue").innerText = document.getElementById("protein").value;
-        document.getElementById("fatValue").innerText = document.getElementById("fat").value;
+        document.getElementById("carbsValue").innerText = document.getElementById("carbs-spike").value;
+        document.getElementById("proteinValue").innerText = document.getElementById("protein-spike").value;
+        document.getElementById("fatValue").innerText = document.getElementById("fat-spike").value;
+        document.getElementById("fiberValue").innerText = document.getElementById("fiber-spike").value;
     }
 
     // Function to update values from sliders
@@ -173,9 +174,9 @@ export function createGlucoseSpike() {
         updatePrediction(
             parseFloat(document.getElementById("preMealGlucose").value),
             parseFloat(document.getElementById("bmi").value),
-            parseFloat(document.getElementById("carbs").value),
-            parseFloat(document.getElementById("protein").value),
-            parseFloat(document.getElementById("fat").value)
+            parseFloat(document.getElementById("carbs-spike").value),
+            parseFloat(document.getElementById("protein-spike").value),
+            parseFloat(document.getElementById("fat-spike").value)
         );
     }
 

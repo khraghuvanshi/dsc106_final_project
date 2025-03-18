@@ -293,3 +293,7 @@ button {
 button:hover {
   background: #0056b3;
 }
+
+.input-group {
+  margin: 15px 0;
+}

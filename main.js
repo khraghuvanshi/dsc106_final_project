@@ -602,13 +602,13 @@ document.addEventListener("DOMContentLoaded", function () {
         createGlucoseSpike();
       }
       else if (isScrollingUp) {
-        const spikeChart = d3.select(".spike-chart");
-        spikeChart
-          .transition()
-          .duration(500)
-          .style("opacity", 0)
-          .remove();
-        createCluster();
+        // const spikeChart = d3.select(".spike-chart");
+        // spikeChart
+        //   .transition()
+        //   .duration(500)
+        //   .style("opacity", 0)
+        //   .remove();
+        // createCluster();
       }
     }
   }
