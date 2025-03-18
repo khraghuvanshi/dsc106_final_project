@@ -91,6 +91,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Clear existing SVG content
       svg.selectAll("*").remove();
+      svg
+        .append("image")
+        .attr("xlink:href", "./diabetes_img2.png")
+        .attr("width", "100%")
+        .attr("height", "100%");
 
       // Set up scales
       const xScale = d3.scaleTime().range([margin.left, width - margin.right]);
@@ -443,12 +448,24 @@ document.addEventListener("DOMContentLoaded", function () {
           .style("opacity", 0);
 
         removeCluster();
+
+        chart.svg
+          .select("image")
+          .transition()
+          .duration(500)
+          .style("opacity", 1);
       }
     }
 
     if (stepIndex === 1) {
       // Create 10-person visualization when entering "Why Should You Care?"
       if (isScrollingDown) {
+        chart.svg
+          .select("image")
+          .transition()
+          .duration(500)
+          .style("opacity", 0);
+
         createDiabetesVisualization();
       }
       // Remove when scrolling away
@@ -588,7 +605,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (isScrollingUp) {
         const svg = d3.select("svg");
         svg
-          .selectAll('g')
+          .selectAll("g")
           .transition()
           .duration(500)
           .style("opacity", 0)
@@ -600,8 +617,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (isScrollingDown) {
         removeCluster();
         createGlucoseSpike();
-      }
-      else if (isScrollingUp) {
+      } else if (isScrollingUp) {
         // const spikeChart = d3.select(".spike-chart");
         // spikeChart
         //   .transition()
