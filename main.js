@@ -1,5 +1,12 @@
 import { createCluster} from "./script.js";
 document.addEventListener("DOMContentLoaded", function () {
+
+  const toggleButton = document.getElementById("toggleNightMode");
+    toggleButton.addEventListener("click", function () {
+        document.body.classList.toggle("night-mode");
+        document.querySelector("#glucoseChart").classList.toggle("night-mode");
+    });
+    
   // Initialize Scrollama
   const scroller = scrollama();
   let chart; // Will hold our chart instance
