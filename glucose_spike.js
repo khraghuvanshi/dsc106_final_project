@@ -1,21 +1,26 @@
 document.addEventListener("DOMContentLoaded", function () {
     let ctx = document.getElementById("glucoseChart").getContext("2d");
 
-    // Initialize chart
+    // Initialize Chart.js
     let glucoseChart = new Chart(ctx, {
         type: "line",
         data: {
             labels: ["Pre-Meal", "1-Hour", "2-Hour"],
             datasets: [
-                { label: "Healthy", borderColor: "green", data: [], fill: false },
-                { label: "Prediabetic", borderColor: "orange", data: [], fill: false },
-                { label: "Diabetic", borderColor: "red", data: [], fill: false }
+                { label: "Healthy", borderColor: "green", data: [0, 0, 0], fill: false },
+                { label: "Prediabetic", borderColor: "orange", data: [0, 0, 0], fill: false },
+                { label: "Diabetic", borderColor: "red", data: [0, 0, 0], fill: false }
             ]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
-                y: { beginAtZero: true, title: { display: true, text: "Glucose Level (mg/dL)" } },
+                y: {
+                    min: 70, // Set lower bound (default fasting glucose)
+                    max: 1000, // Set upper bound
+                    title: { display: true, text: "Glucose Level (mg/dL)" }
+                },
                 x: { title: { display: true, text: "Time" } }
             }
         }
@@ -28,53 +33,62 @@ document.addEventListener("DOMContentLoaded", function () {
         let carbs = parseFloat(document.getElementById("carbs").value);
         let protein = parseFloat(document.getElementById("protein").value);
         let fat = parseFloat(document.getElementById("fat").value);
-        let fiber = parseFloat(document.getElementById("fiber").value);
 
+        // Update displayed values
         document.getElementById("preMealGlucoseValue").innerText = preMealGlucose;
         document.getElementById("bmiValue").innerText = bmi;
         document.getElementById("carbsValue").innerText = carbs;
         document.getElementById("proteinValue").innerText = protein;
         document.getElementById("fatValue").innerText = fat;
-        document.getElementById("fiberValue").innerText = fiber;
 
-        updatePrediction(preMealGlucose, bmi, carbs, protein, fat, fiber);
+        updatePrediction(preMealGlucose, bmi, carbs, protein, fat);
     }
 
-    // Function to calculate glucose spike using Linear Regression Coefficients
-    function calculateGlucoseSpike(diabetesRisk, preMealGlucose, bmi, carbs, protein, fat, fiber) {
-        const coeffs_1H = { Diabetes_Risk: 4.5833, BMI: -0.1660, Carbs: 0.0881, Protein: -0.0253, Fat: 0.0082, Fiber: -0.0091 };
-        const coeffs_2H = { Diabetes_Risk: 12.5774, BMI: -0.0119, Carbs: 0.1635, Protein: -0.0460, Fat: 0.0322, Fiber: -0.0176 };
-
-        let predictedSpike1H = (diabetesRisk * coeffs_1H.Diabetes_Risk) +
-                               (bmi * coeffs_1H.BMI) +
-                               (carbs * coeffs_1H.Carbs) +
-                               (protein * coeffs_1H.Protein) +
-                               (fat * coeffs_1H.Fat) +
-                               (fiber * coeffs_1H.Fiber);
-
-        let predictedSpike2H = (diabetesRisk * coeffs_2H.Diabetes_Risk) +
-                               (bmi * coeffs_2H.BMI) +
-                               (carbs * coeffs_2H.Carbs) +
-                               (protein * coeffs_2H.Protein) +
-                               (fat * coeffs_2H.Fat) +
-                               (fiber * coeffs_2H.Fiber);
-
-        return {
-            glucose1H: preMealGlucose + predictedSpike1H,
-            glucose2H: preMealGlucose + predictedSpike2H
+    // Function to calculate glucose spike
+    function calculateGlucoseSpike(riskLevel, preMealGlucose, bmi, carbs, protein, fat) {
+        const coeffs_1H = {
+            "Healthy": { BMI: 0.2, Carbs: 0.08, Protein: -0.03, Fat: 0.01, PreMealGlucose: 0.95 },
+            "Prediabetic": { BMI: 0.5, Carbs: 0.12, Protein: -0.02, Fat: 0.05, PreMealGlucose: 1.1 },
+            "Diabetic": { BMI: 1.0, Carbs: 0.18, Protein: 0.01, Fat: 0.12, PreMealGlucose: 1.2 }
         };
+
+        const coeffs_2H = {
+            "Healthy": { BMI: 0.1, Carbs: 0.05, Protein: -0.02, Fat: 0.01, PreviousGlucose: 0.5 },
+            "Prediabetic": { BMI: 0.3, Carbs: 0.08, Protein: -0.03, Fat: 0.03, PreviousGlucose: 0.7 },
+            "Diabetic": { BMI: 0.6, Carbs: 0.12, Protein: 0.02, Fat: 0.1, PreviousGlucose: 1.0 }
+        };
+
+        let group = riskLevel === 0 ? "Healthy" : riskLevel === 1 ? "Prediabetic" : "Diabetic";
+
+        // Compute **1-hour glucose spike**
+        let glucose1H = preMealGlucose +
+                        (bmi * coeffs_1H[group].BMI) +
+                        (carbs * coeffs_1H[group].Carbs) +
+                        (protein * coeffs_1H[group].Protein) +
+                        (fat * coeffs_1H[group].Fat) +
+                        (preMealGlucose * coeffs_1H[group].PreMealGlucose);
+
+        // Compute **2-hour glucose** based on **1-hour glucose**
+        let glucose2H = glucose1H +
+                        (bmi * coeffs_2H[group].BMI) +
+                        (carbs * coeffs_2H[group].Carbs) +
+                        (protein * coeffs_2H[group].Protein) +
+                        (fat * coeffs_2H[group].Fat) +
+                        (glucose1H * coeffs_2H[group].PreviousGlucose); 
+
+        return { glucose1H, glucose2H };
     }
 
     // Function to update prediction and chart
-    function updatePrediction(preMealGlucose, bmi, carbs, protein, fat, fiber) {
-        let healthy = calculateGlucoseSpike(0, preMealGlucose, bmi, carbs, protein, fat, fiber);
-        let prediabetic = calculateGlucoseSpike(1, preMealGlucose, bmi, carbs, protein, fat, fiber);
-        let diabetic = calculateGlucoseSpike(2, preMealGlucose, bmi, carbs, protein, fat, fiber);
+    function updatePrediction(preMealGlucose, bmi, carbs, protein, fat) {
+        let healthy = calculateGlucoseSpike(0, preMealGlucose, bmi, carbs, protein, fat);
+        let prediabetic = calculateGlucoseSpike(1, preMealGlucose, bmi, carbs, protein, fat);
+        let diabetic = calculateGlucoseSpike(2, preMealGlucose, bmi, carbs, protein, fat);
 
-        document.getElementById("predPreMeal").innerText = preMealGlucose;
-        document.getElementById("pred1H").innerText = diabetic.glucose1H.toFixed(2);
-        document.getElementById("pred2H").innerText = diabetic.glucose2H.toFixed(2);
+        // **Reset chart data before updating**
+        glucoseChart.data.datasets.forEach(dataset => dataset.data = []);
 
+        // **Add new calculated values**
         glucoseChart.data.datasets[0].data = [preMealGlucose, healthy.glucose1H, healthy.glucose2H];
         glucoseChart.data.datasets[1].data = [preMealGlucose, prediabetic.glucose1H, prediabetic.glucose2H];
         glucoseChart.data.datasets[2].data = [preMealGlucose, diabetic.glucose1H, diabetic.glucose2H];
@@ -82,6 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
         glucoseChart.update();
     }
 
+    // Event Listeners for Sliders
     document.querySelectorAll("input").forEach(input => input.addEventListener("input", updateValues));
     updateValues();
 });
