@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 import { createCluster, clearCluster } from "script.js";
-=======
-import { createCluster } from "/script.js";
->>>>>>> e495096bf03f39cfc8f916eb9cd808c58a15d8ee
+
 document.addEventListener("DOMContentLoaded", function () {
   // Initialize Scrollama
   const scroller = scrollama();
