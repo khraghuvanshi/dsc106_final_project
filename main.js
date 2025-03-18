@@ -5,8 +5,14 @@ document.addEventListener("DOMContentLoaded", function () {
     toggleButton.addEventListener("click", function () {
         document.body.classList.toggle("night-mode");
         document.querySelector("#glucoseChart").classList.toggle("night-mode");
+
+        if (document.body.classList.contains("night-mode")) {
+            toggleButton.innerText = "☀️ Day Mode";
+        } else {
+            toggleButton.innerText = "🌙 Night Mode";
+        }
     });
-    
+
   // Initialize Scrollama
   const scroller = scrollama();
   let chart; // Will hold our chart instance
