@@ -1,14 +1,15 @@
-document.addEventListener("DOMContentLoaded", function () {
+export function createGlucoseSpike() {
     // Set chart dimensions
     const width = 600, height = 400, margin = { top: 50, right: 150, bottom: 50, left: 70 };
 
     // Create SVG canvas
-    const svg = d3.select("#glucoseChartContainer")
+    const svg = d3.select("#glucoseChart")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
+        .attr("transform", `translate(${margin.left},${margin.top})`)
+        .attr('class', 'spike-chart');
 
     // Fixed Y-axis scale
     const yScale = d3.scaleLinear()
@@ -69,7 +70,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // **Create Interactive Legend with Animation**
     const legend = svg.append("g")
-        .attr("transform", `translate(${width + 20}, 50)`);
+        .attr("transform", `translate(${width - 1000}, 50)`)
+        .attr("transform", `translate(${height - 390}, 50)`);
 
     Object.keys(colors).forEach((group, i) => {
         let legendItem = legend.append("g")
@@ -182,4 +184,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Initialize with default values
     updateValues();
-});
+};

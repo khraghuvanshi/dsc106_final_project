@@ -1,18 +1,17 @@
 import { createCluster } from "./script.js";
 import { createGlucoseSpike } from "./glucose_spike.js";
 document.addEventListener("DOMContentLoaded", function () {
-
   const toggleButton = document.getElementById("toggleNightMode");
-    toggleButton.addEventListener("click", function () {
-        document.body.classList.toggle("night-mode");
-        document.querySelector("#glucoseChart").classList.toggle("night-mode");
+  toggleButton.addEventListener("click", function () {
+    document.body.classList.toggle("night-mode");
+    document.querySelector("#glucoseChart").classList.toggle("night-mode");
 
-        if (document.body.classList.contains("night-mode")) {
-            toggleButton.innerText = "☀️ Light Mode";
-        } else {
-            toggleButton.innerText = "🌙 Night Mode";
-        }
-    });
+    if (document.body.classList.contains("night-mode")) {
+      toggleButton.innerText = "☀️ Light Mode";
+    } else {
+      toggleButton.innerText = "🌙 Night Mode";
+    }
+  });
 
   // Initialize Scrollama
   const scroller = scrollama();
@@ -568,9 +567,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (isScrollingDown) {
         createLines(true);
       }
-    }
-
-    else if (stepIndex == 5) {
+    } else if (stepIndex == 5) {
       if (isScrollingDown) {
         chart.pointGroup
           .selectAll(".dot")
@@ -589,14 +586,29 @@ document.addEventListener("DOMContentLoaded", function () {
         fadeOutAxesAndLabels();
         createCluster();
       } else if (isScrollingUp) {
-        console.log("hello");
-      }
-    }
+        const svg = d3.select("svg");
+        svg
+          .selectAll('g')
+          .transition()
+          .duration(500)
+          .style("opacity", 0)
+          .remove();
 
-    else if (stepIndex == 6) {
+        createCluster();
+      }
+    } else if (stepIndex == 6) {
       if (isScrollingDown) {
         removeCluster();
         createGlucoseSpike();
+      }
+      else if (isScrollingUp) {
+        const spikeChart = d3.select(".spike-chart");
+        spikeChart
+          .transition()
+          .duration(500)
+          .style("opacity", 0)
+          .remove();
+        createCluster();
       }
     }
   }
