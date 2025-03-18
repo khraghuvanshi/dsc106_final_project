@@ -72,6 +72,9 @@
               over time. Notice how different meal compositions can lead to
               varying glucose responses.
             </p>
+            <div class="control-panel">
+              <select id="participantDropdown"></select>
+            </div>
           </div>
         </section>
 
@@ -79,18 +82,24 @@
           <div class="step-content">
             <h2>Explore the Data</h2>
             <p>
-              Please put in your macro-nutrient consumption to get a prediction!.
+              Please put in your macro-nutrient consumption to get a
+              prediction!.
             </p>
             <div class="input-container">
-              <label>Carbs (g): <input type="number" id="carbs" value="50"></label>
-              <label>Protein (g): <input type="number" id="protein" value="20"></label>
-              <label>Fat (g): <input type="number" id="fat" value="10"></label>
-              <label>Fiber (g): <input type="number" id="fiber" value="5"></label>
+              <label
+                >Carbs (g): <input type="number" id="carbs" value="50"
+              /></label>
+              <label
+                >Protein (g): <input type="number" id="protein" value="20"
+              /></label>
+              <label
+                >Fat (g): <input type="number" id="fat" value="10"
+              /></label>
+              <label
+                >Fiber (g): <input type="number" id="fiber" value="5"
+              /></label>
               <button onclick="addUserData()">Check Classification</button>
-          </div>
-            <!-- <div class="control-panel">
-              <select id="participantDropdown"></select>
-            </div> -->
+            </div>
           </div>
         </section>
       </div>
@@ -102,6 +111,5 @@
         </div>
       </div>
     </div>
-
   </body>
 </html>

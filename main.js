@@ -1,3 +1,4 @@
+import { createCluster, clearCluster } from "/script.js";
 document.addEventListener("DOMContentLoaded", function () {
   // Initialize Scrollama
   const scroller = scrollama();
@@ -42,7 +43,9 @@ document.addEventListener("DOMContentLoaded", function () {
   // Chart initialization and update functions
   function initializeChart() {
     // Load data
-    d3.csv("CGMacros_merge.csv").then(function (data) {
+    d3.csv(
+      "https://raw.githubusercontent.com/khraghuvanshi/dsc106_final_project/refs/heads/main/CGmacros_merge.csv"
+    ).then(function (data) {
       // Convert data types
       data.forEach((d) => {
         d.Timestamp = new Date(d.Timestamp);
@@ -392,7 +395,7 @@ document.addEventListener("DOMContentLoaded", function () {
     lastStepIndex
   ) {
     if (!chart) return;
-
+    console.log(stepIndex);
     // Blank chart
     if (stepIndex === 0) {
       // If scrolling up from step 1+, remove points/lines and hide axes
@@ -421,6 +424,14 @@ document.addEventListener("DOMContentLoaded", function () {
           .duration(500)
           .style("opacity", 0)
           .remove();
+
+        chart.svg
+          .select(".table-group")
+          .transition()
+          .duration(500)
+          .style("opacity", 0);
+
+        removeCluster();
       }
     }
 
@@ -532,83 +543,126 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Show line segments connecting meal points
-    else if (stepIndex >= 2) {
+    else if (stepIndex == 4) {
       // First ensure all points are visible
       if (!chart.pointGroup.selectAll(".dot").size()) {
         createPoints(false);
       }
-
-      // Ensure axes and labels are visible
-      fadeInAxesAndLabels();
-
-      // Handle line segments based on direction
-      if (!chart.linesCreated) {
-        // Sort meal indices chronologically
-        const sortedMealIndices = [...chart.mealIndices].sort((a, b) => a - b);
-        chart.lineSegments = []; // Reset the line segments data
-
-        // Draw line segments between meal points in sequence
-        for (let i = 0; i < sortedMealIndices.length - 1; i++) {
-          const startIndex = sortedMealIndices[i];
-          const endIndex = sortedMealIndices[i + 1];
-          const segmentData = chart.filteredData.slice(
-            startIndex,
-            endIndex + 1
-          );
-
-          // Store segment data for zooming
-          chart.lineSegments.push(segmentData);
-
-          // Create a path generator for animation
-          const pathGenerator = d3
-            .line()
-            .x((d) => chart.xScale(d.Timestamp))
-            .y((d) => chart.yScale(d["Libre GL"]));
-
-          // Create line segment with starting position at the top
-          const initialPathData = segmentData.map((d) => {
-            return {
-              Timestamp: d.Timestamp,
-              "Libre GL": chart.yScale.domain()[0] - 20, // Start above the chart
-            };
-          });
-
-          const path = chart.lineGroup
-            .append("path")
-            .datum(segmentData)
-            .attr("class", "line-segment")
-            .attr("fill", "none")
-            .attr("stroke", "steelblue")
-            .attr("stroke-width", 2)
-            .attr("d", pathGenerator(initialPathData))
-            .style("opacity", 0);
-
-          // Animate the path dropping in - SLOWER ANIMATION
-          path
-            .transition()
-            .delay(i * 50) // Staggered delay
-            .duration(1000) // 1 second duration
-            .attr("d", pathGenerator)
-            .style("opacity", 1);
-
-          // Add interaction after animation
-          path
-            .on("mouseover", function () {
-              d3.select(this).attr("stroke-width", 4);
-            })
-            .on("mouseout", function () {
-              d3.select(this).attr("stroke-width", 2);
-            })
-            .on("click", function (event, d) {
-              event.stopPropagation();
-              if (!chart.isZoomed) {
-                zoomToSegment(d);
-              }
-            });
-        }
-
-        chart.linesCreated = true; // Mark lines as created
+      if (isScrollingUp) {
+        chart.linesCreated = false;
+        removeCluster();
+        fadeInAxesAndLabels();
+        createLines();
+      } else if (isScrollingDown) {
+        createLines(true);
       }
+    }
+    if (stepIndex == 5) {
+      if (isScrollingDown) {
+        chart.pointGroup
+          .selectAll(".dot")
+          .transition()
+          .duration(500)
+          .style("opacity", 0)
+          .remove();
+
+        chart.lineGroup
+          .selectAll(".line-segment")
+          .transition()
+          .duration(500)
+          .style("opacity", 0)
+          .remove();
+
+        fadeOutAxesAndLabels();
+        createCluster();
+      } else if (isScrollingUp) {
+        console.log("hello");
+      }
+    }
+  }
+
+  function removeCluster() {
+    const svg = d3.select("#glucoseChart");
+    const clusterTooltip = d3.selectAll(".cluster-tooltip");
+    const classificationDots = d3.selectAll(".classification-dot");
+    const classificationText = d3.selectAll(".classification-text");
+    svg
+      .selectAll(".cluster-dot")
+      .transition()
+      .duration(500)
+      .style("opacity", 0)
+      .remove();
+
+    clusterTooltip.transition().duration(500).style("opacity", 0).remove();
+    classificationDots.transition().duration(500).style("opacity", 0).remove();
+    classificationText.transition().duration(500).style("opacity", 0).remove();
+  }
+
+  function createLines(animate) {
+    // Handle line segments based on direction
+    if (!chart.linesCreated) {
+      // Sort meal indices chronologically
+      const sortedMealIndices = [...chart.mealIndices].sort((a, b) => a - b);
+      chart.lineSegments = []; // Reset the line segments data
+
+      // Draw line segments between meal points in sequence
+      for (let i = 0; i < sortedMealIndices.length - 1; i++) {
+        const startIndex = sortedMealIndices[i];
+        const endIndex = sortedMealIndices[i + 1];
+        const segmentData = chart.filteredData.slice(startIndex, endIndex + 1);
+
+        // Store segment data for zooming
+        chart.lineSegments.push(segmentData);
+
+        // Create a path generator for animation
+        const pathGenerator = d3
+          .line()
+          .x((d) => chart.xScale(d.Timestamp))
+          .y((d) => chart.yScale(d["Libre GL"]));
+
+        // Create line segment with starting position at the top
+        const initialPathData = segmentData.map((d) => {
+          return {
+            Timestamp: d.Timestamp,
+            "Libre GL": chart.yScale.domain()[0] - 20, // Start above the chart
+          };
+        });
+
+        const path = chart.lineGroup
+          .append("path")
+          .datum(segmentData)
+          .attr("class", "line-segment")
+          .attr("fill", "none")
+          .attr("stroke", "steelblue")
+          .attr("stroke-width", 2)
+          .attr("d", pathGenerator(initialPathData))
+          .style("opacity", 0);
+
+        // Animate the path dropping in - SLOWER ANIMATION
+        path
+          .transition()
+          .delay(i * 50) // Staggered delay
+          .duration(1000) // 1 second duration
+          .attr("d", pathGenerator)
+          .style("opacity", 1);
+
+        // Add interaction after animation
+        path
+          .on("mouseover", function () {
+            d3.select(this).attr("stroke-width", 4);
+          })
+          .on("mouseout", function () {
+            d3.select(this).attr("stroke-width", 2);
+          })
+          .on("click", function (event, d) {
+            event.stopPropagation();
+            if (!chart.isZoomed) {
+              zoomToSegment(d);
+            }
+          });
+      }
+
+      chart.linesCreated = true; // Mark lines as created
     }
   }
 
