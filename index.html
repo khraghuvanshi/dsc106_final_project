@@ -116,95 +116,120 @@
 
         <section class="step" id="step-6">
           <div class="step-content">
-            <h2>Glucose Spikes</h2>
+            <h2>Different metabolic responses based on health conditions</h2>
             <p>
-              Glucose Spike explanation
+              Diabetics experience significantly higher and longer-lasting 
+              glucose spikes compared to healthy individuals. The interaction 
+              shows that healthy individuals experience a small spike after 
+              eating but their glucose levels stabilize relatively quickly. 
+              In contrast, prediabetics experience a moderate glucose rise, 
+              with levels continuing to increase beyond the one-hour mark, 
+              suggesting early signs of insulin resistance. Diabetics are even
+              worse with the highest spike. Their glucose levels continue to 
+              rise sharply after an hour, showing a reduced ability to regulate 
+              blood sugar effectively due to insulin dysfunction. 
+            </p>
+          </div>
+        </section>
+
+        <section class="step" id="step-6">
+          <div class="step-content">
+            <h2>Pre-meal glucose matters!</h2>
+            <p>
+              If pre-meal glucose is already high, the spike is amplified 
+              significantly. This pattern mirrors the real-world data where 
+              diabetics often start with elevated fasting glucose due to 
+              insulin resistance. The higher the starting glucose, the more 
+              difficult it is for the body to regulate post-meal spikes, 
+              increasing the risk of long-term metabolic complications
+
+            </p>
+          </div>
+        </section>
+
+        <section class="step" id="step-6">
+          <div class="step-content">
+            <h2>Not all macronutrients affect blood sugar equally</h2>
+            <p>
+              Carbohydrates cause the most significant glucose spikes, 
+              reinforcing the importance of carb management. This is evident 
+              in the visualization where meals higher in carbs lead to a 
+              steeper glucose rise, especially in diabetics. In contrast, 
+              protein and fat have a more subtle effect as they slow digestion 
+              and contribute to a gradual increase in glucose levels rather 
+              than a sharp spike. Additionally, BMI plays a role, as individuals 
+              with higher BMI levels often exhibit greater insulin resistance, 
+              leading to higher and more prolonged glucose elevations. 
+            </p>
+          </div>
+        </section>
+
+        <section class="step" id="step-6">
+          <div class="step-content">
+            <h2>Glucose Spike Visualization: Experiment with your diet!</h2>
+            <p>
+              This glucose spike visualization allows user to experiment with 
+              different dietary choices and see how their glucose levels 
+              respond in real-time. By adjusting the BMI, carbohydrate intake, 
+              and other macronutrients, users can observe how different foods 
+              impact glucose spikes. Scroll more for further details!
             </p>
           </div>
         </section>
 
         <section class="step" id="step-7">
           <div class="step-content">
-            <h2>Glucose Spike Predictor</h2>
-            <p>
-              Each point on the graph represents a meal. The y-axis shows
-              glucose levels measured in mg/dL, while the x-axis represents
-              time. Hover over meal points to see detailed nutritional
-              information.
-            </p>
-            <!-- Pre-Meal Glucose Input -->
-            <div class="input-group">
-              <label for="preMealGlucose"
-                >Pre-Meal Glucose (mg/dL):
-                <span id="preMealGlucoseValue">90</span></label
-              >
-              <input
-                type="range"
-                id="preMealGlucose"
-                min="70"
-                max="150"
-                step="1"
-                value="90"
-              />
-            </div>
-
-            <!-- Sliders for user input -->
-            <div class="input-group">
-              <label for="bmi">BMI: <span id="bmiValue">25</span></label>
-              <input
-                type="range"
-                id="bmi"
-                min="15"
-                max="40"
-                step="1"
-                value="25"
-              />
-            </div>
-
-            <div class="input-group">
-              <label for="carbs"
-                >Carbs (grams): <span id="carbsValue">100</span></label
-              >
-              <input
-                type="range"
-                id="carbs-spike"
-                min="0"
-                max="300"
-                step="10"
-                value="100"
-              />
-            </div>
-
-            <div class="input-group">
-              <label for="protein"
-                >Protein (grams): <span id="proteinValue">50</span></label
-              >
-              <input
-                type="range"
-                id="protein-spike"
-                min="0"
-                max="150"
-                step="5"
-                value="50"
-              />
-            </div>
-
-            <div class="input-group">
-              <label for="fat"
-                >Fat (grams): <span id="fatValue">30</span></label
-              >
-              <input
-                type="range"
-                id="fat-spike"
-                min="0"
-                max="100"
-                step="5"
-                value="30"
-              />
-            </div>
-
+              <h2>Glucose Spike Predictor</h2>
+              <p>
+                  Each point on the graph represents a meal. The y-axis shows glucose levels measured in mg/dL, 
+                  while the x-axis represents time. Hover over meal points to see detailed nutritional information.
+              </p>
+              
+              <p><strong>Try adjusting BMI and carb intake</strong> to see how glucose spikes 
+                  differ for healthy, prediabetic, and diabetic individuals!</p>
+      
+              <p><strong>Try increasing the pre-meal glucose slider</strong> and observing how it 
+                  affects 1-hour and 2-hour glucose levels! Notice how a high pre-meal glucose amplifies the spike.</p>
+      
+              <p><strong>Try increasing the carbs</strong> and observe how glucose spikes rise 
+                  sharply, especially for diabetics.</p>
+      
+              <p><strong>Now, adjust the protein and fat intake</strong> to see how they slow digestion 
+                  and cause a more gradual glucose increase.</p>
+      
+              <p><strong>Try experimenting with different BMI levels</strong> to see how insulin 
+                  resistance affects post-meal glucose clearance.</p>
+      
+              <!-- Pre-Meal Glucose Input -->
+              <div class="input-group">
+                  <label for="preMealGlucose">Pre-Meal Glucose (mg/dL): <span id="preMealGlucoseValue">90</span></label>
+                  <input type="range" id="preMealGlucose" min="70" max="150" step="1" value="90"/>
+              </div>
+      
+              <!-- Sliders for user input -->
+              <div class="input-group">
+                  <label for="bmi">BMI: <span id="bmiValue">25</span></label>
+                  <input type="range" id="bmi" min="15" max="40" step="1" value="25"/>
+              </div>
+      
+              <div class="input-group">
+                  <label for="carbs">Carbs (grams): <span id="carbsValue">100</span></label>
+                  <input type="range" id="carbs-spike" min="0" max="300" step="10" value="100"/>
+              </div>
+      
+              <div class="input-group">
+                  <label for="protein">Protein (grams): <span id="proteinValue">50</span></label>
+                  <input type="range" id="protein-spike" min="0" max="150" step="5" value="50"/>
+              </div>
+      
+              <div class="input-group">
+                  <label for="fat">Fat (grams): <span id="fatValue">30</span></label>
+                  <input type="range" id="fat-spike" min="0" max="100" step="5" value="30"/>
+              </div>
+      
           </div>
-        </section>
+      </section>
+      
       </div>
 
       <div class="vis-column">
