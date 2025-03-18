@@ -23,7 +23,7 @@ body.night-mode {
 }
 
 #toggleNightMode {
-  position: absolute;
+  position: right;
   top: 10px;
   right: 20px;
   padding: 8px 12px;
