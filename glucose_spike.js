@@ -165,7 +165,6 @@ export function createGlucoseSpike() {
         document.getElementById("carbsValue").innerText = document.getElementById("carbs-spike").value;
         document.getElementById("proteinValue").innerText = document.getElementById("protein-spike").value;
         document.getElementById("fatValue").innerText = document.getElementById("fat-spike").value;
-        document.getElementById("fiberValue").innerText = document.getElementById("fiber-spike").value;
     }
 
     // Function to update values from sliders
