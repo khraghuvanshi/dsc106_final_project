@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelector("#glucoseChart").classList.toggle("night-mode");
 
         if (document.body.classList.contains("night-mode")) {
-            toggleButton.innerText = "☀️ Day Mode";
+            toggleButton.innerText = "☀️ Light Mode";
         } else {
             toggleButton.innerText = "🌙 Night Mode";
         }
