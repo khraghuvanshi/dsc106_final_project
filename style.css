@@ -47,6 +47,10 @@ body.night-mode {
   color: white;
 }
 
+.night-mode .full-width-title h1 {
+  color: white; /* Explicitly change the h1 text color */
+}
+
 .night-mode h1, 
 .night-mode h2, 
 .night-mode p {
